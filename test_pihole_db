@@ -1,0 +1,45 @@
+#! /usr/bin/env python3
+
+import sqlite3
+
+conn = sqlite3.connect('/etc/pihole/pihole-FTL.db')
+cursor = conn.cursor()
+
+#Query 1: Total Queries today
+cursor.execute("""
+
+	SELECT COUNT(*)
+	FROM queries
+	WHERE timestamp > strftime('%s', 'now', 'start of day')
+""")
+total_queries = cursor.fetchone()[0]
+
+print(f"Total queries today: {total_queries}")
+
+
+#Query 2: Blocked queries today
+cursor.execute("""
+	SELECT COUNT(*)
+	FROM queries
+	WHERE status in (1,4,5,6,7,8,9,10,11)
+	AND timestamp > strftime('%s', 'now', 'start of day')
+""")
+total_blocked_queries = cursor.fetchone()[0]
+
+print(f"Total blocked queries today: {total_blocked_queries}")
+
+#Query 3: Top blocked queries today
+cursor.execute("""
+	SELECT domain, COUNT(*) as count
+	FROM queries
+	WHERE status in (1,4,5,6,7,8,9,10,11)
+	AND timestamp > strftime('%s', 'now', 'start of day')
+  	GROUP BY domain
+	ORDER BY count DESC
+	LIMIT 5
+""")
+top_blocked = cursor.fetchall()
+print("Top 5 blocked domain")
+for domain, count in top_blocked:
+	print(f"{domain}: {count} times")
+conn.close()

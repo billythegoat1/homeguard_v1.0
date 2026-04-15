@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeGuard Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #000000 0%, #1a0033 83%, #9d4edd 100%);
+            color: #ffffff;
+            height: 100vh;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(157, 78, 221, 0.1);
+            border: 2px solid #9d4edd;
+            border-radius: 15px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #9d4edd;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #9d4edd;
+        }
+
+        .subtitle {
+            color: #c77dff;
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: 2px solid #9d4edd;
+            background: rgba(157, 78, 221, 0.2);
+            color: #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #9d4edd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: #9d4edd;
+        }
+
+        .btn-primary:hover {
+            background: #7b2cbf;
+        }
+
+        /* Layout Grids */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .left-column, .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Cards */
+        .stat-card {
+            background: rgba(157, 78, 221, 0.1);
+            border: 2px solid #9d4edd;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(157, 78, 221, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #c77dff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sections */
+        .section {
+            background: rgba(157, 78, 221, 0.05);
+            border: 2px solid #9d4edd;
+            border-radius: 15px;
+            padding: 20px;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .section h2 {
+            color: #9d4edd;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        /* Blocked Domains List */
+        .blocked-list {
+            list-style: none;
+        }
+
+        .blocked-item {
+            background: rgba(157, 78, 221, 0.1);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid #9d4edd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .domain {
+            color: #ffffff;
+            font-size: 1em;
+        }
+
+        .count {
+            background: #9d4edd;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* Firewall Stats */
+        .firewall-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0033 0%, #2d1654 100%);
+            border: 2px solid #9d4edd;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #9d4edd;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #9d4edd;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #c77dff;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(157, 78, 221, 0.1);
+            border: 2px solid #9d4edd;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1em;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #c77dff;
+            box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: #7b2cbf;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .alert-error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                overflow: auto;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .stat-number {
+                font-size: 2em;
+            }
+
+            .firewall-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+	<nav>
+            <div class="nav-brand">
+                <span class="status-indicator"></span>
+                System Active
+            </div>
+            <div class="nav-buttons">
+                <button class="btn" onclick="window.location.reload()">Refresh</button>
+		<button class="btn" onclick="toggleSettings()">Settings</button>
+                <button class="btn btn-primary" onclick="window.open('http://192.168.0.101/admin', '_blank')">Pi-hole Admin</button>
+            </div>
+        </nav>
+        <header>
+            <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#9d4edd;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#5a189a;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path d="M50 5 L90 20 L90 45 Q90 75 50 95 Q10 75 10 45 L10 20 Z" 
+                      fill="url(#shieldGradient)" stroke="#c77dff" stroke-width="2"/>
+                <path d="M50 25 L70 40 L45 70 L30 55 L38 47 L45 54 L62 35 Z" 
+                      fill="#ffffff"/>
+            </svg>
+            <div>
+                <h1>HomeGuard</h1>
+                <p class="subtitle">Network Security Dashboard</p>
+            </div>
+        </header>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Queries</div>
+                <div class="stat-number">{{ today_total_queries }}</div>
+                <div class="stat-label">Today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Blocked</div>
+                <div class="stat-number">{{ today_blocked_queries }}</div>
+                <div class="stat-label">Threats Stopped</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Protection Rate</div>
+                <div class="stat-number">{{ "%.1f"|format((today_blocked_queries / today_total_queries * 100) if today_total_queries > 0 else 0) }}%</div>
+                <div class="stat-label">Blocked</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-column">
+                <div class="section">
+                    <h2>Top Blocked Domains</h2>
+                    <ul class="blocked-list">
+                        {% for domain, count in today_top_blocked_queries %}
+                        <li class="blocked-item">
+                            <span class="domain">{{ domain }}</span>
+                            <span class="count">{{ count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="section">
+                    <h2>Firewall Activity</h2>
+                    <div class="firewall-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Blocks</div>
+                            <div class="stat-number">{{ ufw_blocks }}</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-label">Allowed</div>
+                            <div class="stat-number">{{ ufw_allows }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" onclick="toggleSettings()">×</button>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <form onsubmit="saveSettings(event)">
+                <div class="form-group">
+                    <label class="form-label">Admin Email</label>
+                    <input type="email" class="form-input" placeholder="admin@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Refresh Interval</label>
+                    <select class="form-select">
+                        <option value="10">10 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">1 minute</option>
+                        <option value="300">5 minutes</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Alert Threshold</label>
+                    <input type="number" class="form-input" placeholder="100" min="1" max="1000">
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="emailAlerts">
+                    <label for="emailAlerts" style="color: #ffffff; margin: 0;">Enable Email Alerts</label>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="darkMode" checked>
+                    <label for="darkMode" style="color: #ffffff; margin: 0;">Dark Mode</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleSettings() {
+            document.getElementById('settingsModal').classList.toggle('active');
+        }
+
+        function saveSettings(event) {
+            event.preventDefault();
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '<div class="alert alert-success show">Settings saved successfully!</div>';
+            
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+                toggleSettings();
+            }, 2000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleSettings();
+            }
+        });
+    </script>
+    <script>
+        // Auto-refresh every 10 seconds
+        let countdown = 10;
+        let countdownInterval;
+
+        function updateCountdown() {
+            const refreshBtn = document.querySelector('.nav-buttons .btn');
+            refreshBtn.textContent = `Refresh (${countdown}s)`;
+            countdown--;
+
+            if (countdown < 0) {
+                countdown = 10;
+                window.location.reload();
+            }
+        }
+
+        // Start countdown
+        countdownInterval = setInterval(updateCountdown, 1000);
+
+        // Manual refresh resets countdown
+        document.querySelector('.nav-buttons .btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            clearInterval(countdownInterval);
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>
