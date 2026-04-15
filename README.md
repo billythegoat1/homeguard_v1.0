@@ -123,26 +123,6 @@ sudo ufw status              # View current rules
 sudo ufw allow 8080/tcp      # Add new rule
 sudo ufw delete allow 8080   # Remove rule
 ```
-
-## 📂 Project Structure
-
-
-homeguard/
-├── homeguard_dashboard/
-│   ├── app.py                      # Flask web server
-│   ├── templates/
-│   │   └── dashboard.html          # Dashboard UI
-│   ├── static/                     # CSS/JS (if any)
-│   ├── create_database.sql         # Database schema
-│   ├── insert_sample_data.sql      # Sample data
-│   ├── example_queries.sql         # SQL examples
-│   ├── advanced_features.sql       # Triggers, transactions
-│   └── homeguard_attacks.db        # Attack log database
-├── README.md                       # This file
-├── INSTALL.md                      # Installation guide
-├── LICENSE                         # MIT License
-└── test_pihole_db                  # Pi-hole DB test script
-
 ## 🐛 Common Issues
 
 **WiFi devices can't get IP addresses**
