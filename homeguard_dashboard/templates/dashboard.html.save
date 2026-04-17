@@ -73,13 +73,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: -10px;
+            gap: 20px;
         }
 
         .logo {
-            width: 240px;
-            height: 170px;
-	    margin-right: -70px;
+            width: 60px;
+            height: 60px;
         }
 
         h1 {
@@ -412,11 +411,6 @@
             </div>
         </nav>
         <header>
-	    <img src="{{ url_for('static', filename='icon.png') }}"
-		 class="logo" 
-		 alt="HomeGuard Logo"
-		 style="filter: drop-shadow(0 0 10px rgba(157, 78, 221, 0.5));">
-            <div>
                 <h1>HomeGuard</h1>
                 <p class="subtitle">Network Security Dashboard</p>
             </div>
