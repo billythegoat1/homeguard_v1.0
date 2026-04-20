@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HomeGuard Dashboard</title>
@@ -15,11 +12,10 @@
         }
 
         body {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom, #000000 0%, #1a0033 83%, #9d4edd 100%);
             color: #ffffff;
-            min-height: 100vh;
+            height: 100vh;
             overflow: auto;
             padding: 20px;
         }
@@ -27,7 +23,7 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            min-height: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
@@ -38,7 +34,7 @@
             border: 2px solid #9d4edd;
             border-radius: 15px;
             padding: 15px 30px;
-            margin-bottom: 5px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -77,12 +73,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            
+            gap: -10px;
         }
 
         .logo {
             width: 100px;
-            height: 170px;
+            height: 180px;
+	    
         }
 
         h1 {
@@ -438,30 +435,6 @@
             color: #00ff00;
             font-size: 1.2em;
         }
-        /* Custom Scrollbar for Detected Threats */
-        .section::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .section::-webkit-scrollbar-track {
-            background: rgba(157, 78, 221, 0.1);
-            border-radius: 10px;
-        }
-
-        .section::-webkit-scrollbar-thumb {
-            background: #9d4edd;
-            border-radius: 10px;
-        }
-
-        .section::-webkit-scrollbar-thumb:hover {
-            background: #c77dff;
-        }
-
-        /* Firefox scrollbar */
-        .section {
-            scrollbar-width: thin;
-            scrollbar-color: #9d4edd rgba(157, 78, 221, 0.1);
-        }
 
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -533,19 +506,19 @@
         </header>
 
         <div class="stats-row">
-            <div class="stat-card"  onclick="showQueryGraph()" style="cursor: pointer;">
+            <div class="stat-card">
                 <div class="stat-label">Total Queries</div>
                 <div class="stat-number">{{ today_total_queries }}</div>
                 <div class="stat-label">Today</div>
             </div>
 
-            <div class="stat-card"  onclick="showBlockedGraph()" style="cursor: pointer;">
+            <div class="stat-card">
                 <div class="stat-label">Blocked</div>
                 <div class="stat-number">{{ today_blocked_queries }}</div>
                 <div class="stat-label">Threats Stopped</div>
             </div>
 
-            <div class="stat-card"  onclick="showProtectionGraph()" style="cursor: pointer;">
+            <div class="stat-card">
                 <div class="stat-label">Protection Rate</div>
                 <div class="stat-number">{{ "%.1f"|format((today_blocked_queries / today_total_queries * 100) if today_total_queries > 0 else 0) }}%</div>
                 <div class="stat-label">Blocked</div>
@@ -565,8 +538,27 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <!-- Attack Detection Section -->
-        <div class="section" style="margin-top: 20px; max-height: 300px;">
+            </div>
+
+            <div class="right-column">
+                <div class="section">
+                    <h2>Firewall Activity</h2>
+                    <div class="firewall-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Blocks</div>
+                            <div class="stat-number">{{ ufw_blocks }}</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-label">Allowed</div>
+                            <div class="stat-number">{{ ufw_allows }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Attack Detection Section -->
+        <div class="section" style="margin-top: 20px;">
             <h2>🚨 Detected Threats</h2>
             
             {% if detected_attacks %}
@@ -591,26 +583,6 @@
                 </div>
             {% endif %}
         </div>
-            </div>
-
-            <div class="right-column">
-                <div class="section">
-                    <h2>Firewall Activity</h2>
-                    <div class="firewall-stats">
-                        <div class="stat-card">
-                            <div class="stat-label">Blocks</div>
-                            <div class="stat-number">{{ ufw_blocks }}</div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-label">Allowed</div>
-                            <div class="stat-number">{{ ufw_allows }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
     </div> <!-- End of container -->
     </div>
     <div class="modal" id="settingsModal">
@@ -648,7 +620,10 @@
                     <label for="emailAlerts" style="color: #ffffff; margin: 0;">Enable Email Alerts</label>
                 </div>
 
-                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="darkMode" checked>
+                    <label for="darkMode" style="color: #ffffff; margin: 0;">Dark Mode</label>
+                </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Save Settings</button>
             </form>
@@ -689,11 +664,8 @@
             countdown--;
 
             if (countdown < 0) {
-                
-                const graphModal = document.getElementById('graphModal');
-                if (!graphModal.classList.contains('active')) {
-                    window.location.reload();
-                }
+                countdown = 10;
+                window.location.reload();
             }
         }
 
@@ -707,205 +679,5 @@
             window.location.reload();
         });
     </script>
-    <script>
-        // Graph functionality
-        let currentChart = null;
-
-        function closeGraph() {
-            document.getElementById('graphModal').classList.remove('active');
-            if (currentChart) {
-                currentChart.destroy();
-                currentChart = null;
-            }
-        }
-
-        // Close graph when clicking outside
-        document.getElementById('graphModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeGraph();
-            }
-        });
-
-        function showQueryGraph() {
-            document.getElementById('graphTitle').textContent = 'Total Queries - Last 7 Days';
-            document.getElementById('graphModal').classList.add('active');
-            
-            if (currentChart) {
-                currentChart.destroy();
-            }
-            
-            const ctx = document.getElementById('statsChart').getContext('2d');
-            
-            const labels = {{ history.labels | tojson }};
-            const data = {{ history.total_queries | tojson }};
-            
-            currentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total Queries',
-                        data: data,
-                        borderColor: '#9d4edd',
-                        backgroundColor: 'rgba(157, 78, 221, 0.2)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff',
-                                font: { family: 'Share Tech Mono' }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#c77dff', font: { family: 'Share Tech Mono' } },
-                            grid: { color: 'rgba(157, 78, 221, 0.2)' }
-                        },
-                        x: {
-                            ticks: { color: '#c77dff', font: { family: 'Share Tech Mono' } },
-                            grid: { color: 'rgba(157, 78, 221, 0.2)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function showBlockedGraph() {
-            document.getElementById('graphTitle').textContent = 'Blocked Queries - Last 7 Days';
-            document.getElementById('graphModal').classList.add('active');
-            
-            if (currentChart) {
-                currentChart.destroy();
-            }
-            
-            const ctx = document.getElementById('statsChart').getContext('2d');
-            
-            const labels = {{ history.labels | tojson }};
-            const data = {{ history.blocked_queries | tojson }};  // CHANGED: Use blocked_queries
-            
-            currentChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Blocked Queries',
-                        data: data,
-                        backgroundColor: 'rgba(255, 0, 0, 0.6)',
-                        borderColor: '#ff0000',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff',
-                                font: { family: 'Share Tech Mono' }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#c77dff', font: { family: 'Share Tech Mono' } },
-                            grid: { color: 'rgba(157, 78, 221, 0.2)' }
-                        },
-                        x: {
-                            ticks: { color: '#c77dff', font: { family: 'Share Tech Mono' } },
-                            grid: { color: 'rgba(157, 78, 221, 0.2)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function showProtectionGraph() {
-            document.getElementById('graphTitle').textContent = 'Protection Rate - Last 7 Days';
-            document.getElementById('graphModal').classList.add('active');
-            
-            if (currentChart) {
-                currentChart.destroy();
-            }
-            
-            const ctx = document.getElementById('statsChart').getContext('2d');
-            
-            const labels = {{ history.labels | tojson }};
-            const totalData = {{ history.total_queries | tojson }};
-            const blockedData = {{ history.blocked_queries | tojson }};
-            
-            // Calculate protection rate for each day
-            const protectionRates = totalData.map((total, index) => {
-                return total > 0 ? ((blockedData[index] / total) * 100).toFixed(1) : 0;
-            });
-            
-            currentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Protection Rate (%)',
-                        data: protectionRates,
-                        borderColor: '#9d4edd',
-                        backgroundColor: 'rgba(157, 78, 221, 0.3)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff',
-                                font: { family: 'Share Tech Mono' }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                color: '#c77dff',
-                                font: { family: 'Share Tech Mono' },
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            },
-                            grid: { color: 'rgba(157, 78, 221, 0.2)' }
-                        },
-                        x: {
-                            ticks: { color: '#c77dff', font: { family: 'Share Tech Mono' } },
-                            grid: { color: 'rgba(157, 78, 221, 0.2)' }
-                        }
-                    }
-                }
-            });
-        }
-        // Debug: Log the data
-        console.log('History Labels:', {{ history.labels | tojson }});
-        console.log('Total Queries:', {{ history.total_queries | tojson }});
-        console.log('Blocked Queries:', {{ history.blocked_queries | tojson }});
-    </script>
-    <!-- Graph Modal -->
-    <div class="modal" id="graphModal">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <h2 id="graphTitle">Query Statistics</h2>
-                <button class="close-btn" onclick="closeGraph()">×</button>
-            </div>
-            <canvas id="statsChart" width="400" height="200"></canvas>
-        </div>
-    </div>
 </body>
 </html>
